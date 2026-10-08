@@ -31,7 +31,13 @@ const Auth = class Auth {
                     token // TODO: à retirer
                 });
             } catch (error) {
-                //@ts-ignore
+                //@ts-expect-error
+                if (error.code === 11000) {
+                    return res.status(400).json({
+                        message: 'Cet email est déjà utilisé par un utilisateur',
+                    });
+                }
+                //@ts-expect-error
                 console.error(error.message);
                 return res.status(500).json({
                     code: 500,

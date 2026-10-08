@@ -52,7 +52,7 @@ const Server = class Server {
         }
     }
 
-    //@ts-expect-error
+    //@ts-ignore
     authToken(req, res, next) {
         if (!req.cookies.access_token) return res.sendStatus(401);
         const token = req.cookies.access_token;
