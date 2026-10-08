@@ -81,6 +81,7 @@ const Server = class Server {
     routes() {
         new routes.Auth(this.app);
         new routes.Events(this.app, this.authToken);
+        new routes.Groups(this.app, this.authToken);
         this.app.use((req, res) => {
             res.status(404).json({
                 code: 404,

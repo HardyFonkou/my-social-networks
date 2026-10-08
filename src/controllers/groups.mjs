@@ -1,6 +1,6 @@
-import Event from "../models/event.mjs";
+import Group from "../models/group.mjs";
 
-const Events = class Events {
+const Groups = class Groups {
     //@ts-ignore
     constructor(app, authToken) {
         this.app = app;
@@ -9,20 +9,22 @@ const Events = class Events {
         this.run();
     }
 
-    createEvent() {
+    createGroup() {
         //@ts-ignore
-        this.app.post('/event', this.authToken, async (req, res) => {
+        this.app.post('/group', this.authToken, async (req, res) => {
             try {
                 const user = req.user;
-                const event = new Event({
-                    ...req.body,
-                    organizers: [user.id],
-                    participants: [user.id],
+                const payload = req.body;
+                const group = new Group({
+                    ...payload,
+                    creator: user.id,
+                    administrators: [...payload.administrators, user.id],
+                    members: [...payload.members, user.id],
                 });
-                await event.save();
+                await group.save();
                 return res.status(201).json({
                     code: 201,
-                    message: 'Event successfully created'
+                    message: 'Group successfully created'
                 });
             } catch (error) {
                 //@ts-expect-error
@@ -47,42 +49,42 @@ const Events = class Events {
         })
     }
 
-    addParticipant() {
+    addMember() {
         //@ts-ignore
-        this.app.put('/event/:idevent/participant/:idparticipant', this.authToken, async (req, res) => {
+        this.app.put('/group/:idgroup/member/:idmember', this.authToken, async (req, res) => {
             try {
-                const eventId = req.params.idevent;
-                const participantId = req.params.idparticipant;
+                const groupId = req.params.idgroup;
+                const memberId = req.params.idmember;
                 const userId = req.user.id;
 
-                const event = await Event.find({ _id: eventId });
+                const group = await Group.find({ _id: groupId });
 
-                if (!event) {
+                if (!group) {
                     return res.status(404).json({
                         code: 404,
-                        message: 'Event Not Found'
+                        message: 'Group Not Found'
                     });
                 }
 
                 //@ts-ignore
-                const userIsAnOrganizer = event.organizers.includes(userId);
+                const userIsAnAdministrator = group.administrators.includes(userId);
                 
-                if (!userIsAnOrganizer) {
+                if (!userIsAnAdministrator) {
                     return res.status(401).json({
                         code: 401,
-                        message: "Vous n'êtes pas autorisé à rajouter des participants à cet événement"
+                        message: "Vous n'êtes pas autorisé à ajouter des membre à ce groupe"
                     });
                 }
                 
-                const updatedEvent = await Event.findByIdAndUpdate(
-                    eventId,
-                    { $push: { participants: participantId }},
+                const updatedGroup = await Group.findByIdAndUpdate(
+                    groupId,
+                    { $push: { members: memberId }},
                     { new: true, runValidators: true }
                 );
                 return res.status(201).json({
                     code: 201,
-                    message: 'Participant successfully added',
-                    data: {...updatedEvent}
+                    message: 'Member successfully added',
+                    data: {...updatedGroup}
                 });
             } catch (error) {
                 //@ts-expect-error
@@ -108,9 +110,9 @@ const Events = class Events {
     }
 
     async run() {
-        this.createEvent();
-        this.addParticipant();
+        this.createGroup();
+        this.addMember();
     }
 }
 
-export default Events;
+export default Groups;
