@@ -1,0 +1,17 @@
+{
+  "name": "my-social-networks",
+  "version": "1.0.0",
+  "description": "TP implémentation d'une API pour Facebook",
+  "license": "MIT",
+  "author": "Neil Hardy NOUOJE FONKOU",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "dev": "node index.mjs",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "express": "^5.2.1",
+    "mongoose": "^9.11.1"
+  }
+}
