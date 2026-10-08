@@ -1,5 +1,6 @@
 import express from 'express';
 import mongoose from 'mongoose';
+import jwt from 'jsonwebtoken';
 
 import routes from './routes.mjs';
 
@@ -49,6 +50,27 @@ const Server = class Server {
             //@ts-ignore
             console.error(`[ERROR] api dbConnect() => ${error.message}`);   
         }
+    }
+
+    //@ts-expect-error
+    authToken(req, res, next) {
+        if (!req.cookies.access_token) return res.sendStatus(401);
+        const token = req.cookies.access_token;
+        const jwtSecret = process.env.jwtsecret;
+        if (!jwtSecret) {
+            throw new Error('jwtSecret is not defined');
+        }
+        //@ts-expect-error
+        jwt.verify(token, jwtSecret, (err, user) => {
+            if (err) return res.status(401).json({
+                code: 401,
+                message: 'Accès refusé'
+            });
+
+            req.user = user;
+
+            next();
+        });
     }
 
     middleware() {
