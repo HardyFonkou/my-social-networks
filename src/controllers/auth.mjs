@@ -21,9 +21,9 @@ const Auth = class Auth {
                 const { firstname, lastname, email } = req.body;
 
                 const user = new User({ firstname, lastname, email });
-                await user.save();
+                const savedUser = await user.save();
 
-                const token = jwt.sign({ firstname, lastname, email }, jwtSecret);
+                const token = jwt.sign({ firstname, lastname, email, id: savedUser._id }, jwtSecret);
                 res.cookie('access_token', token, { expires: new Date(Date.now() + 24 * 12 * 3600000) });
                 return res.status(201).json({
                     code: 201,
